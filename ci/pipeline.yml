@@ -214,6 +214,19 @@ jobs:
         repository: galoy-staging
         rebase: true
 
+- name: check-k8s-version
+  plan:
+  - in_parallel:
+    - get: daily-trigger-resource
+      trigger: true
+    - get: repo
+  - task: check-for-k8s-upgrade
+    config:
+      inputs:
+      - name: repo
+      run:
+        path: pipeline-tasks/ci/tasks/check-for-k8s-upgrade.sh
+
 resources:
 - name: repo
   type: git
@@ -265,6 +278,10 @@ resources:
     uri: #@ data.values.git_uri
     branch: #@ data.values.git_version_branch
     private_key: #@ data.values.github_private_key
+
+- name: daily-trigger-resource
+  type: time
+  source: {interval: 24h}
 
 resource_types:
 - name: terraform
